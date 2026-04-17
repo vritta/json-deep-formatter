@@ -47,16 +47,16 @@
   }
 
   [data-theme="light"] {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f6f8fa;
-    --bg-tertiary: #eef1f5;
-    --bg-hover: #e8ecf1;
-    --bg-input: #ffffff;
-    --border: #d0d7de;
+    --bg-primary: #f0f0f0;
+    --bg-secondary: #e6e6e6;
+    --bg-tertiary: #dcdcdc;
+    --bg-hover: #d5d5d8;
+    --bg-input: #ebebeb;
+    --border: #c0c0c8;
     --border-focus: #0969da;
     --text-primary: #1f2328;
-    --text-secondary: #656d76;
-    --text-muted: #8c959f;
+    --text-secondary: #4a4f57;
+    --text-muted: #6b7280;
     --accent: #0969da;
     --accent-hover: #0550ae;
     --danger: #cf222e;
@@ -66,18 +66,18 @@
     --string-color: #0a3069;
     --number-color: #0550ae;
     --boolean-color: #cf222e;
-    --null-color: #8c959f;
-    --bracket-color: #656d76;
-    --shadow: 0 8px 32px rgba(0,0,0,0.08);
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --null-color: #6b7280;
+    --bracket-color: #4a4f57;
+    --shadow: 0 8px 32px rgba(0,0,0,0.1);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --glow: 0 0 20px rgba(9,105,218,0.1);
-    --nested-badge-bg: #f3f0ff;
+    --nested-badge-bg: #e8e4f8;
     --nested-badge-border: #8250df;
-    --nested-badge-text: #8250df;
-    --highlight-bg: rgba(154, 103, 0, 0.1);
+    --nested-badge-text: #6b3fc7;
+    --highlight-bg: rgba(154, 103, 0, 0.12);
     --highlight-border: #9a6700;
-    --scrollbar-track: #f6f8fa;
-    --scrollbar-thumb: #d0d7de;
+    --scrollbar-track: #e6e6e6;
+    --scrollbar-thumb: #b0b0b8;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -120,7 +120,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--text-primary);
   }
@@ -143,7 +143,7 @@
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text-primary);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition);
@@ -222,7 +222,7 @@
   }
 
   .panel-title {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -247,7 +247,7 @@
     border: none;
     outline: none;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.6;
     resize: none;
     tab-size: 2;
@@ -280,7 +280,7 @@
     border-radius: 6px;
     color: var(--text-primary);
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 14px;
     outline: none;
     transition: border-color var(--transition);
   }
@@ -297,8 +297,8 @@
   .tree-view {
     padding: 12px 0;
     font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.7;
+    font-size: 14.5px;
+    line-height: 1.75;
     user-select: text;
   }
 
@@ -307,10 +307,10 @@
   .tree-line {
     display: flex;
     align-items: flex-start;
-    padding: 1px 16px 1px 0;
+    padding: 2px 16px 2px 0;
     cursor: default;
     border-radius: 3px;
-    min-height: 24px;
+    min-height: 28px;
     transition: background var(--transition);
   }
 
@@ -323,8 +323,8 @@
   }
 
   .tree-toggle {
-    width: 20px;
-    height: 24px;
+    width: 22px;
+    height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -339,8 +339,8 @@
   .tree-toggle.collapsed svg { transform: rotate(-90deg); }
 
   .tree-toggle svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     transition: transform 0.15s ease;
   }
 
@@ -414,8 +414,8 @@
   .raw-view {
     padding: 16px;
     font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 14.5px;
+    line-height: 1.65;
     white-space: pre-wrap;
     word-break: break-all;
     color: var(--text-primary);
@@ -429,7 +429,7 @@
     padding: 8px 16px;
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     flex-shrink: 0;
   }
@@ -477,7 +477,7 @@
   }
 
   .empty-state p {
-    font-size: 14px;
+    font-size: 15px;
     max-width: 300px;
     line-height: 1.5;
   }
@@ -552,31 +552,25 @@
   .path-segment:hover { text-decoration: underline; }
   .path-sep { color: var(--text-muted); margin: 0 2px; }
 
-  /* Tooltip */
-  .tooltip {
-    position: relative;
-  }
-
-  .tooltip::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 10px;
+  /* Tooltip (JS-managed, appended to body) */
+  .tip-popup {
+    position: fixed;
+    padding: 6px 12px;
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    font-size: 11px;
+    font-size: 12px;
+    font-family: var(--font-sans);
     border-radius: 6px;
     white-space: nowrap;
-    opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s;
     border: 1px solid var(--border);
-    z-index: 50;
+    box-shadow: var(--shadow-sm);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.15s ease;
   }
 
-  .tooltip:hover::after { opacity: 1; }
+  .tip-popup.visible { opacity: 1; }
 
   /* Responsive */
   @media (max-width: 768px) {
@@ -1120,13 +1114,16 @@ function clearInput() {
 // Sample data
 function loadSample() {
   $('jsonInput').value = JSON.stringify({
-    "informationId": "DASHBOARD_DATA",
-    "origin": "WUI",
-    "request": "update",
-    "param": {
-      "last_update": "2026-04-17T06:19:15.010212",
-      "dashboard": "{\"modules\": [{\"title_slug\": \"DASH_MODULE_SYSTEM_STATUS\", \"status\": 2, \"url\": null, \"additional_params\": {}, \"rows\": [{\"title_slug\": \"DASH_ROW_SYSTEM_STATE_SUMMARY\", \"value\": null, \"value_slug\": \"VALUE_MODE_OPERATIONAL\", \"value_status\": null, \"additional_params\": {}}]}], \"additional_params\": {\"stations\": []}}"
-    }
+    "apiVersion": "2.0",
+    "context": "weather_service",
+    "method": "getforecast",
+    "params": {
+      "location": {"city": "Berlin", "country": "DE", "coordinates": {"lat": 52.52, "lng": 13.405}},
+      "units": "metric",
+      "forecast": "{\"days\": [{\"date\": \"2026-04-17\", \"high\": 18.5, \"low\": 9.2, \"condition\": \"Partly Cloudy\", \"humidity\": 62, \"wind\": {\"speed\": 12.3, \"direction\": \"NW\"}, \"hourly\": [{\"time\": \"06:00\", \"temp\": 10.1, \"condition\": \"Clear\"}, {\"time\": \"12:00\", \"temp\": 17.8, \"condition\": \"Partly Cloudy\"}, {\"time\": \"18:00\", \"temp\": 15.4, \"condition\": \"Overcast\"}]}, {\"date\": \"2026-04-18\", \"high\": 21.0, \"low\": 11.5, \"condition\": \"Sunny\", \"humidity\": 45, \"wind\": {\"speed\": 8.7, \"direction\": \"SW\"}, \"hourly\": [{\"time\": \"06:00\", \"temp\": 12.0, \"condition\": \"Clear\"}, {\"time\": \"12:00\", \"temp\": 20.5, \"condition\": \"Sunny\"}, {\"time\": \"18:00\", \"temp\": 18.2, \"condition\": \"Clear\"}]}], \"alerts\": [], \"metadata\": {\"source\": \"OpenWeather\", \"updated_at\": \"2026-04-17T08:30:00Z\", \"timezone\": \"Europe/Berlin\"}}"
+    },
+    "status": {"code": 200, "message": "OK"},
+    "tags": ["weather", "forecast", "europe"]
   });
   formatJSON();
 }
@@ -1210,6 +1207,34 @@ $('jsonInput').addEventListener('paste', () => {
     }
   }, 50);
 });
+
+// Tooltip system (fixed position, appended to body, never clipped)
+(function initTooltips() {
+  const tip = document.createElement('div');
+  tip.className = 'tip-popup';
+  document.body.appendChild(tip);
+  let hideTimer = null;
+
+  document.addEventListener('mouseenter', e => {
+    const el = e.target.closest('[data-tip]');
+    if (!el) return;
+    clearTimeout(hideTimer);
+    tip.textContent = el.getAttribute('data-tip');
+    tip.classList.add('visible');
+    const rect = el.getBoundingClientRect();
+    const tipRect = tip.getBoundingClientRect();
+    let left = rect.left + rect.width / 2 - tipRect.width / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tipRect.width - 8));
+    tip.style.left = left + 'px';
+    tip.style.top = (rect.top - tipRect.height - 8) + 'px';
+  }, true);
+
+  document.addEventListener('mouseleave', e => {
+    const el = e.target.closest('[data-tip]');
+    if (!el) return;
+    hideTimer = setTimeout(() => tip.classList.remove('visible'), 100);
+  }, true);
+})();
 </script>
 </body>
 </html>
