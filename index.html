@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Viewer</title>
+<style>
+  :root {
+    --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --radius: 10px;
+    --transition: 0.2s ease;
+  }
+
+  [data-theme="dark"] {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #1c2333;
+    --bg-hover: #1f2a3a;
+    --bg-input: #0d1117;
+    --border: #30363d;
+    --border-focus: #58a6ff;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --accent: #58a6ff;
+    --accent-hover: #79c0ff;
+    --danger: #f85149;
+    --success: #3fb950;
+    --warning: #d29922;
+    --key-color: #79c0ff;
+    --string-color: #a5d6ff;
+    --number-color: #79c0ff;
+    --boolean-color: #ff7b72;
+    --null-color: #8b949e;
+    --bracket-color: #8b949e;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --glow: 0 0 20px rgba(88,166,255,0.15);
+    --nested-badge-bg: #1f1d2e;
+    --nested-badge-border: #7c3aed;
+    --nested-badge-text: #a78bfa;
+    --highlight-bg: rgba(210, 153, 34, 0.2);
+    --highlight-border: #d29922;
+    --scrollbar-track: #161b22;
+    --scrollbar-thumb: #30363d;
+  }
+
+  [data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-tertiary: #eef1f5;
+    --bg-hover: #e8ecf1;
+    --bg-input: #ffffff;
+    --border: #d0d7de;
+    --border-focus: #0969da;
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --text-muted: #8c959f;
+    --accent: #0969da;
+    --accent-hover: #0550ae;
+    --danger: #cf222e;
+    --success: #1a7f37;
+    --warning: #9a6700;
+    --key-color: #0550ae;
+    --string-color: #0a3069;
+    --number-color: #0550ae;
+    --boolean-color: #cf222e;
+    --null-color: #8c959f;
+    --bracket-color: #656d76;
+    --shadow: 0 8px 32px rgba(0,0,0,0.08);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --glow: 0 0 20px rgba(9,105,218,0.1);
+    --nested-badge-bg: #f3f0ff;
+    --nested-badge-border: #8250df;
+    --nested-badge-text: #8250df;
+    --highlight-bg: rgba(154, 103, 0, 0.1);
+    --highlight-border: #9a6700;
+    --scrollbar-track: #f6f8fa;
+    --scrollbar-thumb: #d0d7de;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* Header */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .logo svg { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    font-family: var(--font-sans);
+  }
+
+  .btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--text-muted);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  .btn-icon {
+    padding: 7px 8px;
+    min-width: 34px;
+    justify-content: center;
+  }
+
+  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .btn-group {
+    display: flex;
+    gap: 0;
+  }
+
+  .btn-group .btn {
+    border-radius: 0;
+  }
+
+  .btn-group .btn:first-child { border-radius: 8px 0 0 8px; }
+  .btn-group .btn:last-child { border-radius: 0 8px 8px 0; }
+  .btn-group .btn:not(:last-child) { border-right: none; }
+
+  .btn-group .btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* Main Layout */
+  .main {
+    display: flex;
+    height: calc(100vh - 57px);
+  }
+
+  .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .panel-input { border-right: 1px solid var(--border); }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+
+  .panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .panel-body { flex: 1; overflow: auto; position: relative; }
+
+  /* Input */
+  #jsonInput {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: none;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    resize: none;
+    tab-size: 2;
+  }
+
+  #jsonInput::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* Search */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    height: 0;
+    overflow: hidden;
+    transition: height 0.2s ease;
+  }
+
+  .search-bar.open { height: 44px; }
+
+  .search-input {
+    flex: 1;
+    padding: 6px 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+
+  .search-input:focus { border-color: var(--border-focus); }
+
+  .search-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* Tree View */
+  .tree-view {
+    padding: 12px 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    user-select: text;
+  }
+
+  .tree-node { position: relative; }
+
+  .tree-line {
+    display: flex;
+    align-items: flex-start;
+    padding: 1px 16px 1px 0;
+    cursor: default;
+    border-radius: 3px;
+    min-height: 24px;
+    transition: background var(--transition);
+  }
+
+  .tree-line:hover { background: var(--bg-hover); }
+
+  .tree-line.highlight {
+    background: var(--highlight-bg);
+    outline: 1px solid var(--highlight-border);
+    outline-offset: -1px;
+  }
+
+  .tree-toggle {
+    width: 20px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    user-select: none;
+  }
+
+  .tree-toggle:hover { color: var(--accent); }
+  .tree-toggle.collapsed svg { transform: rotate(-90deg); }
+
+  .tree-toggle svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.15s ease;
+  }
+
+  .tree-indent {
+    display: inline-block;
+    width: 24px;
+    flex-shrink: 0;
+  }
+
+  .tree-spacer {
+    display: inline-block;
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .tree-key {
+    color: var(--key-color);
+    margin-right: 0;
+    white-space: nowrap;
+  }
+
+  .tree-colon {
+    color: var(--text-muted);
+    margin-right: 6px;
+  }
+
+  .tree-value { word-break: break-all; }
+  .tree-value.string { color: var(--string-color); }
+  .tree-value.number { color: var(--number-color); }
+  .tree-value.boolean { color: var(--boolean-color); }
+  .tree-value.null { color: var(--null-color); font-style: italic; }
+
+  .tree-bracket {
+    color: var(--bracket-color);
+    font-weight: 500;
+  }
+
+  .tree-comma { color: var(--text-muted); }
+
+  .tree-children { display: block; }
+  .tree-children.hidden { display: none; }
+
+  .tree-summary {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-left: 6px;
+    font-style: italic;
+  }
+
+  .nested-json-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--nested-badge-bg);
+    color: var(--nested-badge-text);
+    border: 1px solid var(--nested-badge-border);
+    margin-left: 6px;
+    cursor: pointer;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .nested-json-badge:hover { filter: brightness(1.2); }
+
+  /* Raw View */
+  .raw-view {
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text-primary);
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .stats-bar span { white-space: nowrap; }
+
+  .stat-label { color: var(--text-secondary); }
+
+  /* Error */
+  .error-box {
+    margin: 16px;
+    padding: 14px 16px;
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    color: var(--danger);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .error-box strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+
+  /* Empty */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    gap: 12px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    max-width: 300px;
+    line-height: 1.5;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 10px 18px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Resize Handle */
+  .resize-handle {
+    width: 5px;
+    cursor: col-resize;
+    background: var(--border);
+    transition: background var(--transition);
+    flex-shrink: 0;
+  }
+
+  .resize-handle:hover, .resize-handle.active {
+    background: var(--accent);
+  }
+
+  /* Path Breadcrumb */
+  .path-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-height: 0;
+    overflow: hidden;
+    transition: min-height 0.2s ease, padding 0.2s ease;
+    flex-shrink: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .path-bar:empty {
+    min-height: 0;
+    padding: 0 16px;
+    border: none;
+  }
+
+  .path-segment {
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  .path-segment:hover { text-decoration: underline; }
+  .path-sep { color: var(--text-muted); margin: 0 2px; }
+
+  /* Tooltip */
+  .tooltip {
+    position: relative;
+  }
+
+  .tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 10px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 11px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    border: 1px solid var(--border);
+    z-index: 50;
+  }
+
+  .tooltip:hover::after { opacity: 1; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main { flex-direction: column; height: auto; min-height: calc(100vh - 57px); }
+    .panel { min-height: 40vh; }
+    .panel-input { border-right: none; border-bottom: 1px solid var(--border); }
+    .resize-handle { display: none; }
+    .header { padding: 10px 12px; }
+    .btn span.hide-mobile { display: none; }
+  }
+
+  /* Drop zone */
+  .drop-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(88, 166, 255, 0.08);
+    border: 2px dashed var(--accent);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .panel-input.dragover .drop-overlay { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M8 12h12"/><path d="M12 18h8"/></svg>
+      JSON Viewer
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-icon tooltip" data-tip="Toggle theme" onclick="toggleTheme()" id="themeBtn">
+      <svg id="themeIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="main">
+  <!-- Input Panel -->
+  <div class="panel panel-input" id="inputPanel">
+    <div class="panel-header">
+      <span class="panel-title">Input</span>
+      <div class="panel-actions">
+        <button class="btn" onclick="loadSample()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="hide-mobile">Sample</span>
+        </button>
+        <button class="btn" onclick="clearInput()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6l1 14h12l1-14"/></svg>
+          <span class="hide-mobile">Clear</span>
+        </button>
+        <button class="btn btn-primary" onclick="formatJSON()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Format
+        </button>
+      </div>
+    </div>
+    <div class="panel-body" style="position: relative;">
+      <div class="drop-overlay">Drop JSON file here</div>
+      <textarea id="jsonInput" placeholder='Paste your JSON here...\n\nSupports:\n  - Standard JSON\n  - Stringified/escaped JSON (nested \"...\")\n  - JSON files (drag & drop)\n\nPress Ctrl+Enter to format' spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <!-- Resize Handle -->
+  <div class="resize-handle" id="resizeHandle"></div>
+
+  <!-- Output Panel -->
+  <div class="panel panel-output" id="outputPanel">
+    <div class="panel-header">
+      <span class="panel-title">Output</span>
+      <div class="panel-actions">
+        <button class="btn btn-icon tooltip" data-tip="Search (Ctrl+F)" onclick="toggleSearch()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <div class="btn-group">
+          <button class="btn active" id="btnTree" onclick="switchView('tree')">Tree</button>
+          <button class="btn" id="btnRaw" onclick="switchView('raw')">Raw</button>
+        </div>
+        <button class="btn tooltip" data-tip="Expand all" onclick="expandAll()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+        </button>
+        <button class="btn tooltip" data-tip="Collapse all" onclick="collapseAll()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+        </button>
+        <button class="btn tooltip" data-tip="Copy formatted" onclick="copyFormatted()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span class="hide-mobile">Copy</span>
+        </button>
+      </div>
+    </div>
+    <div class="search-bar" id="searchBar">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="search-input" id="searchInput" placeholder="Search keys or values..." oninput="doSearch(this.value)">
+      <span class="search-count" id="searchCount"></span>
+      <button class="btn btn-icon" style="padding:4px 6px" onclick="toggleSearch()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="path-bar" id="pathBar"></div>
+    <div class="panel-body" id="outputBody">
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16"/><path d="M8 12h12"/><path d="M12 18h8"/></svg>
+        <p>Paste JSON on the left and click <strong>Format</strong> or press <strong>Ctrl+Enter</strong></p>
+      </div>
+      <div class="tree-view" id="treeView" style="display:none;"></div>
+      <pre class="raw-view" id="rawView" style="display:none;"></pre>
+    </div>
+    <div class="stats-bar" id="statsBar" style="display:none;">
+      <span><span class="stat-label">Type:</span> <span id="statType">-</span></span>
+      <span><span class="stat-label">Items:</span> <span id="statItems">-</span></span>
+      <span><span class="stat-label">Depth:</span> <span id="statDepth">-</span></span>
+      <span><span class="stat-label">Size:</span> <span id="statSize">-</span></span>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let parsedData = null;
+let currentView = 'tree';
+let searchTerm = '';
+
+// Theme
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('json-viewer-theme', next);
+  const icon = $('themeIcon');
+  icon.innerHTML = next === 'dark'
+    ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+    : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('json-viewer-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    if (saved === 'light') toggleTheme(); // re-init icon
+    if (saved === 'light') toggleTheme(); // correct state
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+})();
+
+// Smart JSON parsing: recursively parse stringified JSON values
+function smartParse(input) {
+  if (typeof input !== 'string') return input;
+
+  let str = input.trim();
+
+  // Try parsing as-is
+  try {
+    const parsed = JSON.parse(str);
+    return deepUnstring(parsed);
+  } catch (e) {}
+
+  // Try fixing common issues: single quotes -> double quotes won't work reliably,
+  // but let's try wrapping in case it's a bare object
+  throw new Error('Invalid JSON: ' + e.message);
+}
+
+function deepUnstring(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'string') {
+    const trimmed = obj.trim();
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+      try {
+        const inner = JSON.parse(trimmed);
+        return deepUnstring(inner);
+      } catch (e) {
+        return obj;
+      }
+    }
+    return obj;
+  }
+  if (Array.isArray(obj)) return obj.map(deepUnstring);
+  if (typeof obj === 'object') {
+    const result = {};
+    for (const [k, v] of Object.entries(obj)) {
+      result[k] = deepUnstring(v);
+    }
+    return result;
+  }
+  return obj;
+}
+
+function formatJSON() {
+  const input = $('jsonInput').value.trim();
+  if (!input) {
+    showToast('Please paste some JSON first');
+    return;
+  }
+
+  try {
+    const raw = JSON.parse(input);
+    parsedData = deepUnstring(raw);
+    renderOutput();
+    showToast('Formatted successfully');
+  } catch (e) {
+    parsedData = null;
+    $('treeView').style.display = 'none';
+    $('rawView').style.display = 'none';
+    $('emptyState').style.display = 'none';
+    $('statsBar').style.display = 'none';
+
+    const errDiv = document.createElement('div');
+    errDiv.className = 'error-box';
+    errDiv.id = 'errorBox';
+    errDiv.innerHTML = `<strong>Parse Error</strong>${escapeHtml(e.message)}`;
+    const existing = document.getElementById('errorBox');
+    if (existing) existing.remove();
+    $('outputBody').prepend(errDiv);
+  }
+}
+
+function renderOutput() {
+  const existing = document.getElementById('errorBox');
+  if (existing) existing.remove();
+
+  $('emptyState').style.display = 'none';
+  $('statsBar').style.display = 'flex';
+
+  // Stats
+  const stats = computeStats(parsedData);
+  $('statType').textContent = stats.type;
+  $('statItems').textContent = stats.items.toLocaleString();
+  $('statDepth').textContent = stats.depth;
+  $('statSize').textContent = formatBytes(new Blob([JSON.stringify(parsedData)]).size);
+
+  if (currentView === 'tree') {
+    $('treeView').style.display = 'block';
+    $('rawView').style.display = 'none';
+    renderTree();
+  } else {
+    $('treeView').style.display = 'none';
+    $('rawView').style.display = 'block';
+    $('rawView').textContent = JSON.stringify(parsedData, null, 2);
+  }
+}
+
+function computeStats(obj, depth = 0) {
+  if (obj === null || typeof obj !== 'object') {
+    return { type: typeof obj, items: 1, depth: depth };
+  }
+  const isArr = Array.isArray(obj);
+  const entries = isArr ? obj : Object.values(obj);
+  let maxDepth = depth;
+  let totalItems = 0;
+  for (const v of entries) {
+    const s = computeStats(v, depth + 1);
+    maxDepth = Math.max(maxDepth, s.depth);
+    totalItems += s.items;
+  }
+  return {
+    type: isArr ? `Array[${entries.length}]` : `Object{${Object.keys(obj).length}}`,
+    items: totalItems + entries.length,
+    depth: maxDepth
+  };
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+  return (b / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Tree rendering
+function renderTree() {
+  const container = $('treeView');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  buildNode(frag, parsedData, null, 0, false, []);
+  container.appendChild(frag);
+  if (searchTerm) doSearch(searchTerm);
+}
+
+function buildNode(parent, value, key, depth, isLast, path) {
+  const isObj = value !== null && typeof value === 'object' && !Array.isArray(value);
+  const isArr = Array.isArray(value);
+
+  if (isObj || isArr) {
+    buildCollapsible(parent, value, key, depth, isLast, isObj, path);
+  } else {
+    buildLeaf(parent, value, key, depth, isLast, path);
+  }
+}
+
+function buildCollapsible(parent, value, key, depth, isLast, isObj, path) {
+  const node = document.createElement('div');
+  node.className = 'tree-node';
+
+  const entries = isObj ? Object.entries(value) : value.map((v, i) => [i, v]);
+  const count = entries.length;
+  const openBracket = isObj ? '{' : '[';
+  const closeBracket = isObj ? '}' : ']';
+  const autoCollapse = depth >= 3 && count > 0;
+
+  // Header line
+  const line = document.createElement('div');
+  line.className = 'tree-line';
+  line.setAttribute('data-path', path.join('.'));
+  line.addEventListener('click', () => updatePath(path, key));
+
+  let html = buildIndent(depth);
+  html += `<span class="tree-toggle${autoCollapse ? ' collapsed' : ''}" onclick="toggleNode(this, event)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </span>`;
+
+  if (key !== null && key !== undefined) {
+    html += `<span class="tree-key">"${escapeHtml(String(key))}"</span><span class="tree-colon">: </span>`;
+  }
+  html += `<span class="tree-bracket">${openBracket}</span>`;
+
+  if (count === 0) {
+    html += `<span class="tree-bracket">${closeBracket}</span>`;
+    if (!isLast) html += `<span class="tree-comma">,</span>`;
+  } else {
+    html += `<span class="tree-summary">${count} ${isObj ? (count === 1 ? 'key' : 'keys') : (count === 1 ? 'item' : 'items')}</span>`;
+  }
+
+  line.innerHTML = html;
+  node.appendChild(line);
+
+  if (count > 0) {
+    const children = document.createElement('div');
+    children.className = 'tree-children' + (autoCollapse ? ' hidden' : '');
+
+    for (let i = 0; i < entries.length; i++) {
+      const [k, v] = entries[i];
+      const childPath = [...path, k];
+      buildNode(children, v, k, depth + 1, i === entries.length - 1, childPath);
+    }
+
+    // Closing bracket
+    const closeLine = document.createElement('div');
+    closeLine.className = 'tree-line';
+    let closeHtml = buildIndent(depth);
+    closeHtml += `<span class="tree-spacer"></span>`;
+    closeHtml += `<span class="tree-bracket">${closeBracket}</span>`;
+    if (!isLast) closeHtml += `<span class="tree-comma">,</span>`;
+    closeLine.innerHTML = closeHtml;
+    children.appendChild(closeLine);
+
+    node.appendChild(children);
+  }
+
+  parent.appendChild(node);
+}
+
+function buildLeaf(parent, value, key, depth, isLast, path) {
+  const line = document.createElement('div');
+  line.className = 'tree-line';
+  line.setAttribute('data-path', path.join('.'));
+  line.addEventListener('click', () => updatePath(path, key));
+
+  let html = buildIndent(depth);
+  html += `<span class="tree-spacer"></span>`;
+
+  if (key !== null && key !== undefined) {
+    html += `<span class="tree-key">"${escapeHtml(String(key))}"</span><span class="tree-colon">: </span>`;
+  }
+
+  html += formatValue(value);
+  if (!isLast) html += `<span class="tree-comma">,</span>`;
+
+  line.innerHTML = html;
+  parent.appendChild(line);
+}
+
+function buildIndent(depth) {
+  let s = '';
+  for (let i = 0; i < depth; i++) s += '<span class="tree-indent"></span>';
+  return s;
+}
+
+function formatValue(v) {
+  if (v === null) return '<span class="tree-value null">null</span>';
+  if (typeof v === 'boolean') return `<span class="tree-value boolean">${v}</span>`;
+  if (typeof v === 'number') return `<span class="tree-value number">${v}</span>`;
+  if (typeof v === 'string') {
+    const escaped = escapeHtml(v);
+    const display = escaped.length > 500 ? escaped.substring(0, 500) + '...' : escaped;
+    return `<span class="tree-value string">"${display}"</span>`;
+  }
+  return `<span class="tree-value">${escapeHtml(String(v))}</span>`;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Toggle expand/collapse
+function toggleNode(toggle, event) {
+  event.stopPropagation();
+  const node = toggle.closest('.tree-node');
+  const children = node.querySelector('.tree-children');
+  if (!children) return;
+
+  const isCollapsed = children.classList.contains('hidden');
+  children.classList.toggle('hidden');
+  toggle.classList.toggle('collapsed');
+
+  const summary = toggle.parentElement.querySelector('.tree-summary');
+  if (summary) summary.style.display = isCollapsed ? 'none' : 'inline';
+}
+
+function expandAll() {
+  $('treeView').querySelectorAll('.tree-children.hidden').forEach(c => c.classList.remove('hidden'));
+  $('treeView').querySelectorAll('.tree-toggle.collapsed').forEach(t => t.classList.remove('collapsed'));
+  $('treeView').querySelectorAll('.tree-summary').forEach(s => s.style.display = 'none');
+}
+
+function collapseAll() {
+  $('treeView').querySelectorAll('.tree-children').forEach(c => c.classList.add('hidden'));
+  $('treeView').querySelectorAll('.tree-toggle').forEach(t => t.classList.add('collapsed'));
+  $('treeView').querySelectorAll('.tree-summary').forEach(s => s.style.display = 'inline');
+}
+
+// View switch
+function switchView(view) {
+  currentView = view;
+  $('btnTree').classList.toggle('active', view === 'tree');
+  $('btnRaw').classList.toggle('active', view === 'raw');
+  if (parsedData !== null) renderOutput();
+}
+
+// Search
+function toggleSearch() {
+  const bar = $('searchBar');
+  const isOpen = bar.classList.contains('open');
+  bar.classList.toggle('open');
+  if (!isOpen) {
+    $('searchInput').focus();
+  } else {
+    $('searchInput').value = '';
+    searchTerm = '';
+    clearHighlights();
+    $('searchCount').textContent = '';
+  }
+}
+
+function doSearch(term) {
+  searchTerm = term.toLowerCase();
+  clearHighlights();
+  if (!searchTerm) {
+    $('searchCount').textContent = '';
+    return;
+  }
+
+  let count = 0;
+  $('treeView').querySelectorAll('.tree-line').forEach(line => {
+    const text = line.textContent.toLowerCase();
+    if (text.includes(searchTerm)) {
+      line.classList.add('highlight');
+      count++;
+      // expand parents
+      let parent = line.parentElement;
+      while (parent && parent !== $('treeView')) {
+        if (parent.classList.contains('tree-children') && parent.classList.contains('hidden')) {
+          parent.classList.remove('hidden');
+          const toggle = parent.previousElementSibling?.querySelector('.tree-toggle');
+          if (toggle) {
+            toggle.classList.remove('collapsed');
+            const summary = toggle.parentElement.querySelector('.tree-summary');
+            if (summary) summary.style.display = 'none';
+          }
+        }
+        parent = parent.parentElement;
+      }
+    }
+  });
+
+  $('searchCount').textContent = `${count} match${count !== 1 ? 'es' : ''}`;
+
+  // Scroll to first match
+  const first = $('treeView').querySelector('.tree-line.highlight');
+  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function clearHighlights() {
+  $('treeView').querySelectorAll('.tree-line.highlight').forEach(l => l.classList.remove('highlight'));
+}
+
+// Path breadcrumb
+function updatePath(path, key) {
+  const bar = $('pathBar');
+  if (!path || path.length === 0) {
+    bar.innerHTML = '<span class="path-segment" onclick="updatePath([])">$</span>';
+    return;
+  }
+  let html = '<span class="path-segment" onclick="updatePath([])">$</span>';
+  for (let i = 0; i < path.length; i++) {
+    const seg = path[i];
+    html += '<span class="path-sep">.</span>';
+    const subpath = JSON.stringify(path.slice(0, i + 1));
+    html += `<span class="path-segment">${escapeHtml(String(seg))}</span>`;
+  }
+  bar.innerHTML = html;
+}
+
+// Copy
+function copyFormatted() {
+  if (!parsedData) {
+    showToast('Nothing to copy');
+    return;
+  }
+  const text = JSON.stringify(parsedData, null, 2);
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+// Clear
+function clearInput() {
+  $('jsonInput').value = '';
+  parsedData = null;
+  $('treeView').innerHTML = '';
+  $('rawView').textContent = '';
+  $('treeView').style.display = 'none';
+  $('rawView').style.display = 'none';
+  $('emptyState').style.display = 'flex';
+  $('statsBar').style.display = 'none';
+  $('pathBar').innerHTML = '';
+  const existing = document.getElementById('errorBox');
+  if (existing) existing.remove();
+}
+
+// Sample data
+function loadSample() {
+  $('jsonInput').value = JSON.stringify({
+    "informationId": "DASHBOARD_DATA",
+    "origin": "WUI",
+    "request": "update",
+    "param": {
+      "last_update": "2026-04-17T06:19:15.010212",
+      "dashboard": "{\"modules\": [{\"title_slug\": \"DASH_MODULE_SYSTEM_STATUS\", \"status\": 2, \"url\": null, \"additional_params\": {}, \"rows\": [{\"title_slug\": \"DASH_ROW_SYSTEM_STATE_SUMMARY\", \"value\": null, \"value_slug\": \"VALUE_MODE_OPERATIONAL\", \"value_status\": null, \"additional_params\": {}}]}], \"additional_params\": {\"stations\": []}}"
+    }
+  });
+  formatJSON();
+}
+
+// Toast
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    formatJSON();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f' && document.activeElement !== $('jsonInput')) {
+    e.preventDefault();
+    toggleSearch();
+  }
+});
+
+// Drag & Drop
+const inputPanel = document.querySelector('.panel-input');
+inputPanel.addEventListener('dragover', e => {
+  e.preventDefault();
+  inputPanel.classList.add('dragover');
+});
+inputPanel.addEventListener('dragleave', () => inputPanel.classList.remove('dragover'));
+inputPanel.addEventListener('drop', e => {
+  e.preventDefault();
+  inputPanel.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      $('jsonInput').value = ev.target.result;
+      formatJSON();
+    };
+    reader.readAsText(file);
+  }
+});
+
+// Resize handle
+const handle = $('resizeHandle');
+let isResizing = false;
+handle.addEventListener('mousedown', e => {
+  isResizing = true;
+  handle.classList.add('active');
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (!isResizing) return;
+  const container = document.querySelector('.main');
+  const rect = container.getBoundingClientRect();
+  const pct = ((e.clientX - rect.left) / rect.width) * 100;
+  const clamped = Math.max(20, Math.min(80, pct));
+  $('inputPanel').style.flex = 'none';
+  $('inputPanel').style.width = clamped + '%';
+  $('outputPanel').style.flex = '1';
+});
+document.addEventListener('mouseup', () => {
+  if (isResizing) {
+    isResizing = false;
+    handle.classList.remove('active');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }
+});
+
+// Auto-format on paste (if input looks like JSON)
+$('jsonInput').addEventListener('paste', () => {
+  setTimeout(() => {
+    const v = $('jsonInput').value.trim();
+    if (v && (v.startsWith('{') || v.startsWith('['))) {
+      formatJSON();
+    }
+  }, 50);
+});
+</script>
+</body>
+</html>
